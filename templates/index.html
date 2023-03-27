@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <title>Главная страница </title>
+</head>
+<body>
+
+<dev>
+    <dev class="text_block">
+        <p>Данный сайт предназначен для демонстрации работы распознавания голосовых команд с использованием сверточной
+            нейронной сети.
+        </p>
+    </dev>
+    <dev class="text_block">
+        <p> Нейронная сеть представляет собой классификатор и распознает команду, сказанную вами после нажатия кнопки в
+            течении двух секунд. По завершении распознавания вызывается определенное действие.
+            Командами являются цифры, произнесенные на английском языке. Действия - открытие новой вкладки
+            соответствующего
+            сайта.
+        </p>
+    </dev>
+    <dev class="text_block">
+        <p>Список команд и соответсвующие им действия представлены далее:</p>
+    </dev>
+    <dev class="text_block">
+        <ol start="0">
+            <li> Вконтакте (https://vk.com)</li>
+            <li> Яндекс погода (https://yandex.ru/pogoda/)</li>
+            <li> Сайт Самарского университета(https://ssau.ru/)</li>
+            <li> Гитхаб (https://github.com/)</li>
+            <li> Почта gmail (https://mail.google.com/)</li>
+            <li> Ютуб (https://www.youtube.com/)</li>
+            <li> Гугл переводчик (https://translate.google.com/)</li>
+            <li> Яндекс (https://ya.ru/)</li>
+            <li> Гугл (https://google.com/)</li>
+            <li> Твитч (https://www.twitch.tv/)</li>
+        </ol>
+    </dev>
+</dev>
+
+
+<button class="button" id="recordButton">Запись</button>
+<script>
+    var audioContext = new AudioContext();
+
+    var recorder;
+    var button = document.getElementById('recordButton');
+    button.addEventListener('click', function() {
+      button.disabled = true;
+      navigator.mediaDevices.getUserMedia({audio: true}).then(function(stream) {
+        recorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+
+        var chunks = [];
+
+        recorder.start();
+
+        setTimeout(function() {
+          recorder.stop();
+        }, 2000);
+
+        recorder.ondataavailable = function(event) {
+          chunks.push(event.data);
+          if (recorder.state == 'inactive') {
+            var blob = new Blob(chunks, {type: 'audio/webm'});
+
+            var audioURL = URL.createObjectURL(blob);
+
+            var audio = new Audio(audioURL);
+            audio.play();
+
+            sendData(blob);
+          }
+        }
+      });
+    });
+
+    function sendData(blob) {
+      var formData = new FormData();
+      formData.append('audio', blob);
+
+      var xhr = new XMLHttpRequest();
+
+      xhr.onload = function() {
+        if (xhr.status == 200) {
+          console.log('Данные успешно отправлены на сервер!');
+          var link = xhr.responseText;
+          openNewTab(link)
+        } else {
+          console.log('Ошибка при отправке данных на сервер.');
+        }
+      };
+      button.disabled=false;
+      xhr.open('POST', '/', true);
+      xhr.send(formData);
+    }
+    function openNewTab(url) {
+            window.open(url, '_blank');
+        }
+
+
+
+
+
+
+</script>
+</div>
+</body>
+</html>

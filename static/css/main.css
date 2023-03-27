@@ -1,0 +1,36 @@
+body {
+     background-color: #212529;
+}
+.text_block{
+    font-size: 18px;
+    font-family: Courier;
+    color: #fff;
+    margin: 10px;
+    display: block;
+}
+
+.button {
+    background-color: #0d6efd;
+    color: #fff;
+    width: 300px;
+    font-size: 20px;
+    border-radius: 20px;
+    border: 2px solid silver;
+    margin: auto;
+    margin-top: 10%;
+    padding: 10px 20px;
+    display: block;
+}
+
+.button:not(:disabled):hover {
+    opacity: 0.8;
+}
+
+.button:not(:disabled):active {
+    background-color: #5696f5;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
