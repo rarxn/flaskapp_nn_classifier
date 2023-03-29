@@ -6,6 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='image/favicon.ico') }}">
     <title>Главная страница </title>
 </head>
 <body>
@@ -47,65 +48,60 @@
 <button class="button" id="recordButton">Запись</button>
 <script>
     var audioContext = new AudioContext();
-
     var recorder;
+
     var button = document.getElementById('recordButton');
     button.addEventListener('click', function() {
-      button.disabled = true;
-      navigator.mediaDevices.getUserMedia({audio: true}).then(function(stream) {
-        recorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+        button.disabled = true;
+        navigator.mediaDevices.getUserMedia({audio: true}).then(function(stream) {
+            recorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+            var chunks = [];
+            recorder.start();
 
-        var chunks = [];
+            setTimeout(function() {
+                recorder.stop();
+            }, 2000);
 
-        recorder.start();
+            recorder.ondataavailable = function(event) {
+                chunks.push(event.data);
+                if (recorder.state == 'inactive') {
+                    var blob = new Blob(chunks, {type: 'audio/webm'});
 
-        setTimeout(function() {
-          recorder.stop();
-        }, 2000);
+                    var audioURL = URL.createObjectURL(blob);
 
-        recorder.ondataavailable = function(event) {
-          chunks.push(event.data);
-          if (recorder.state == 'inactive') {
-            var blob = new Blob(chunks, {type: 'audio/webm'});
+                    var audio = new Audio(audioURL);
+                    audio.play();
 
-            var audioURL = URL.createObjectURL(blob);
-
-            var audio = new Audio(audioURL);
-            audio.play();
-
-            sendData(blob);
-          }
-        }
-      });
+                    sendData(blob);
+                }
+            }
+        });
     });
 
     function sendData(blob) {
-      var formData = new FormData();
-      formData.append('audio', blob);
+        var formData = new FormData();
+        formData.append('audio', blob);
 
-      var xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
 
-      xhr.onload = function() {
+        xhr.onload = function() {
         if (xhr.status == 200) {
-          console.log('Данные успешно отправлены на сервер!');
-          var link = xhr.responseText;
-          openNewTab(link)
-        } else {
-          console.log('Ошибка при отправке данных на сервер.');
+            console.log('Данные успешно отправлены на сервер!');
+            var link = xhr.responseText;
+            openNewTab(link)
         }
-      };
-      button.disabled=false;
-      xhr.open('POST', '/', true);
-      xhr.send(formData);
+        else {
+            console.log('Ошибка при отправке данных на сервер.');
+        }
+        };
+        button.disabled=false;
+        xhr.open('POST', '/', true);
+        xhr.send(formData);
     }
+
     function openNewTab(url) {
-            window.open(url, '_blank');
-        }
-
-
-
-
-
+        window.open(url, '_blank');
+    }
 
 </script>
 </div>

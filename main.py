@@ -1,24 +1,24 @@
 from flask import Flask, render_template, url_for, request
 from flask_ngrok import run_with_ngrok
 from tensorflow import keras
-from functions import *
+from functions import get_prediction
 
+# подгружаем обученную модель
 model = keras.models.load_model('main_model')
+# создание объекта веб-приложения и подключение сервиса ngrok
 app = Flask(__name__)
-
 run_with_ngrok(app)
 
 
+# обработка маршрутизации
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """ POST - обработка полученных данных от клиента, формирование прогноза
+    GET - отображение html формы главной страницы
+    """
     if request.method == "POST":
-        filename = './recordings/0.wav '
         audio = request.files.get('audio')
-        audio.save(filename)
-        trim_silence_file(filename, 50)
-        print('Файл с аудио получен и обработан успешно!')
-        type = model_predict(model, filename)
-        return get_link(type)
+        return get_prediction(audio, model)
     else:
         return render_template('index.html')
 
